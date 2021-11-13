@@ -6,7 +6,7 @@ It contains:
 - Profile system (own profile and of others)
 - Personal Area (settings)
 
-It's not contains: (assailable to spam attacks etc)
+It's NOT contains: (assailable to spam attacks etc)
 - rate limiting on registration
 - email activation
 - uploading covers (not finished)
