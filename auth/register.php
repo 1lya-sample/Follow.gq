@@ -1,5 +1,15 @@
 <?php
 error_reporting(0);
+// **PREVENTING SESSION HIJACKING**
+// Prevents javascript XSS attacks aimed to steal the session ID
+ini_set('session.cookie_httponly', 1);
+
+// **PREVENTING SESSION FIXATION**
+// Session ID cannot be passed through URLs
+ini_set('session.use_only_cookies', 1);
+
+// Uses a secure connection (HTTPS) if possible
+ini_set('session.cookie_secure', 1);
 session_start();
 include "../incl/connection.php";
 echo'<html>
@@ -15,10 +25,10 @@ echo'<html>
 								<div id="main">
 									<article class="panel">';
 $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
-if($_POST["userName"] != "" AND $_POST["userPass"] != "" AND $_POST["repeatPass"] != "" AND $_POST["userMail"] != "" AND $_POST["repeatMail"] != ""  AND $_POST["repeatPass"] = $_POST["userPass"] AND $_POST["repeatMail"] = $_POST["userMail"]){
-	$userName = htmlspecialchars($_POST["userName"]);
-	$password = htmlspecialchars($_POST["userPass"]);
-	$email = htmlspecialchars($_POST["userMail"]);
+if(!empty($_POST["userName"]) && !empty($_POST["userPass"]) && !empty($_POST["repeatPass"]) && !empty($_POST["userMail"]) && !empty($_POST["repeatMail"]) && $_POST["repeatPass"] = $_POST["userPass"] && $_POST["repeatMail"] = $_POST["userMail"]){
+	$userName = htmlspecialchars($_POST["userName"],ENT_QUOTES);
+	$password = htmlspecialchars($_POST["userPass"],ENT_QUOTES);
+	$email = htmlspecialchars($_POST["userMail"],ENT_QUOTES);
 	$hashpass = md5($password);
 	$query = $db->prepare("SELECT count(*) FROM users WHERE ip = :ip");
 	$query->execute([":ip" => $ip]);
@@ -50,19 +60,19 @@ if($_POST["userName"] != "" AND $_POST["userPass"] != "" AND $_POST["repeatPass"
 		<div>
 		 <div class="row">
 			<div class="col-12">
-			<input type="text" class="form-control" name="userName" id="userName" placeholder="Введите имя">
+				<input type="text" class="form-control" name="userName" placeholder="Введите имя">
 			</div>
 			<div class="col-12">
-			<input type="password" class="form-control" name="userPass" id="exampleInputPassword1" placeholder="Введите пароль">
+				<input type="password" class="form-control" name="userPass" placeholder="Введите пароль">
 			</div>
 			<div class="col-12">
-			<input type="password" class="form-control" name="repeatPass" placeholder="Повторите пароль">
+				<input type="password" class="form-control" name="repeatPass" placeholder="Повторите пароль">
 			</div>
 			<div class="col-12">
-			<input type="email" class="form-control" name="userMail" placeholder="Введите почту">
+				<input type="email" class="form-control" name="userMail" placeholder="Введите почту">
 			</div>
 			<div class="col-12">
-			<input type="email" class="form-control" name="repeatMail" placeholder="Повторите почту">
+				<input type="email" class="form-control" name="repeatMail" placeholder="Повторите почту">
 			</div>
 			<div class="col-12">
 				<input type="submit" value="Зарегистрироваться" />
