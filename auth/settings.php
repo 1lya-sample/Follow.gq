@@ -1,5 +1,15 @@
 <?php
 error_reporting(0);
+// **PREVENTING SESSION HIJACKING**
+// Prevents javascript XSS attacks aimed to steal the session ID
+ini_set('session.cookie_httponly', 1);
+
+// **PREVENTING SESSION FIXATION**
+// Session ID cannot be passed through URLs
+ini_set('session.use_only_cookies', 1);
+
+// Uses a secure connection (HTTPS) if possible
+ini_set('session.cookie_secure', 1);
 session_start();
 include "../incl/connection.php";
 echo'<html>
@@ -15,38 +25,18 @@ echo'<html>
 								<div id="main">
 									<article class="panel">';
 if(isset($_SESSION["id"]) AND $_SESSION["id"] != 0){
-		$session = htmlspecialchars($_SESSION["id"]);	
-		$query = $db->prepare("SELECT * FROM users WHERE id = :id"); 
-	    $query->execute([':id' => $session]);
-	    $result = $query->fetchAll();
-		foreach($result as &$user){
-			$name = $user['name'];
-		}
-		if(!empty($user['discord'])){
-			$displaydiscord = $user['discord'];
-		}else{
-			$displaydiscord = 'Введите Discord';
-		}
-		if(!empty($user['telegram'])){
-			$displaytg = $user['telegram'];
-		}else{
-			$displaytg = 'Введите Telegram';
-		}
-		if(!empty($user['vk'])){
-			$displayvk = $user['vk'];
-		}else{
-			$displayvk = 'Введите VK';
-		}
-		if(!empty($user['git'])){
-			$displaygit = $user['git'];
-		}else{
-			$displaygit = 'Введите GitHub';
-		}
-		if(!empty($user['status'])){
-			$displaystatus = $user['status'];
-		}else{
-			$displaystatus = 'Введите статус (описание)';
-		}
+	$session = $_SESSION["id"];	
+	$query = $db->prepare("SELECT * FROM users WHERE id = :id"); 
+	$query->execute([':id' => $session]);
+	$result = $query->fetchAll();
+	foreach($result as &$user){
+		$name = $user['name'];
+	}
+	$displaydiscord = !empty($user['discord']) ? $user['discord'] : 'Введите Discord';
+	$displaytg = !empty($user['telegram']) ? $user['telegram'] : 'Введите Telegram';
+	$displayvk = !empty($user['vk']) ? $user['vk'] : 'Введите VK';
+	$displaygit = !empty($user['git']) ? $user['git'] : 'Введите GitHub';
+	$displaystatus = !empty($user['status']) ? $user['status'] : 'Введите статус (описание)';
 	echo'
 			<header>
 				<h2>Настройки</h2>
@@ -61,22 +51,22 @@ if(isset($_SESSION["id"]) AND $_SESSION["id"] != 0){
 			</div>
 			
 			<div class="col-12">
-			Telegram:
-			<input type="text" class="form-control" name="telegram" id="name" placeholder="'.$displaytg.'">
+				Telegram:
+				<input type="text" class="form-control" name="telegram" id="name" placeholder="'.$displaytg.'">
 			</div>
 			
 			<div class="col-12">
-			VK:
-			<input type="text" class="form-control" name="vk" id="name" placeholder="'.$displayvk.'">
+				VK:
+				<input type="text" class="form-control" name="vk" id="name" placeholder="'.$displayvk.'">
 			</div>
 			
 			<div class="col-12">
-			GitHub:
-			<input type="text" class="form-control" name="git" id="name" placeholder="'.$displaygit.'">
+				GitHub:
+				<input type="text" class="form-control" name="git" id="name" placeholder="'.$displaygit.'">
 			</div>
 			<div class="col-12">
-			Статус:
-			<input type="text" class="form-control" name="status" id="name" placeholder="'.$displaystatus.'">
+				Статус:
+				<input type="text" class="form-control" name="status" id="name" placeholder="'.$displaystatus.'">
 			</div>
 			<div class="col-12">
 				<input type="submit" value="Сохранить" />
@@ -84,34 +74,35 @@ if(isset($_SESSION["id"]) AND $_SESSION["id"] != 0){
 		  </div>	
 		</div>
 	</form>';
-	$discord = htmlspecialchars($_POST["discord"]);
-	$tg = htmlspecialchars($_POST["telegram"]);
-	$vk = htmlspecialchars($_POST["vk"]);
-	$git = htmlspecialchars($_POST["git"]);
-	$status = htmlspecialchars($_POST["status"]);
-	if(!empty($discord)){
+	
+	if(!empty($_POST["discord"])){
+		$discord = htmlspecialchars($_POST["discord"],ENT_QUOTES);
 		$query = $db->prepare("UPDATE users SET discord = :discord WHERE id = :id");
-	$query->execute([':discord' => $discord, ':id' => $session]);
+		$query->execute([':discord' => $discord, ':id' => $session]);
 	}
-	if(!empty($tg)){
+	if(!empty($_POST["telegram"])){
+		$tg = htmlspecialchars($_POST["telegram"],ENT_QUOTES);
 		$query = $db->prepare("UPDATE users SET telegram = :tg WHERE id = :id");
-	$query->execute([':tg' => $tg, ':id' => $session]);
+		$query->execute([':tg' => $tg, ':id' => $session]);
 	}
-	if(!empty($vk)){
+	if(!empty($_POST["vk"])){
+		$vk = htmlspecialchars($_POST["vk"],ENT_QUOTES);
 		$query = $db->prepare("UPDATE users SET vk = :vk WHERE id = :id");
-	$query->execute([':vk' => $vk, ':id' => $session]);
+		$query->execute([':vk' => $vk, ':id' => $session]);
 	}
-	if(!empty($git)){
+	if(!empty($_POST["git"])){
+		$git = htmlspecialchars($_POST["git"],ENT_QUOTES);
 		$query = $db->prepare("UPDATE users SET git = :git WHERE id = :id");
-	$query->execute([':git' => $git, ':id' => $session]);
+		$query->execute([':git' => $git, ':id' => $session]);
 	}
-	if(!empty($status)){
+	if(!empty($_POST["status"])){
+		$status = htmlspecialchars($_POST["status"],ENT_QUOTES);
 		$query = $db->prepare("UPDATE users SET status = :status WHERE id = :id");
-	$query->execute([':status' => $status, ':id' => $session]);
+		$query->execute([':status' => $status, ':id' => $session]);
 	}
-		}else{
-			echo'Войдите в аккаунт, пожалуйста =)';
-		}
+}else{
+	echo'Войдите в аккаунт, пожалуйста =)';
+}
  echo'</article>
 </div>
 				<!-- Footer -->
