@@ -1,7 +1,17 @@
 <?php
 error_reporting(0);
+// **PREVENTING SESSION HIJACKING**
+// Prevents javascript XSS attacks aimed to steal the session ID
+ini_set('session.cookie_httponly', 1);
+
+// **PREVENTING SESSION FIXATION**
+// Session ID cannot be passed through URLs
+ini_set('session.use_only_cookies', 1);
+
+// Uses a secure connection (HTTPS) if possible
+ini_set('session.cookie_secure', 1);
 session_start();
-$_SESSION["id"] = 0;
+unset($_SESSION["id"]);
 echo'<html>
 	<head>
 		<meta charset="utf-8" />
@@ -12,11 +22,11 @@ echo'<html>
 
 		<!-- Wrapper-->
 			<div id="wrapper">
-								<div id="main">
-									<article class="panel">
-	 Ты вышел из аккаунта. <a href="/">Перейти на главную</a>
-	</article>
-</div>
+				<div id="main">
+					<article class="panel">
+						Ты вышел из аккаунта. <a href="/">Перейти на главную</a>
+					</article>
+				</div>
 				<!-- Footer -->
 					<div id="footer">
 						<ul class="copyright">
@@ -24,7 +34,7 @@ echo'<html>
 						</ul>
 					</div>
 					
-</div>
+			</div>
 					
 		<!-- Scripts -->
 			<script src="../incl/js/jquery.min.js"></script>
