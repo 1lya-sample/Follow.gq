@@ -1,5 +1,15 @@
 <?php
 error_reporting(0);
+// **PREVENTING SESSION HIJACKING**
+// Prevents javascript XSS attacks aimed to steal the session ID
+ini_set('session.cookie_httponly', 1);
+
+// **PREVENTING SESSION FIXATION**
+// Session ID cannot be passed through URLs
+ini_set('session.use_only_cookies', 1);
+
+// Uses a secure connection (HTTPS) if possible
+ini_set('session.cookie_secure', 1);
 session_start();
 include "../incl/connection.php";
 echo'<html>
@@ -16,47 +26,47 @@ echo'<html>
 									<article class="panel">';
 $ip = $_SERVER["HTTP_CF_CONNECTING_IP"];
 if(isset($_SESSION["id"]) AND $_SESSION["id"] != 0){
-		echo'<p>Ты уже вошёл. Зачем еще раз это делать? <a href="/">Перейти на главную</a></p>';
-	}else{
-if($_POST["name"] != "" AND $_POST["password"] != ""){
-	$name = htmlspecialchars($_POST["name"]);
-	$pass = md5(htmlspecialchars($_POST["password"]));
-	// getting user
-	$query = $db->prepare("SELECT * FROM users WHERE name = :name"); 
-	$query->execute([':name' => $name]);
-	$user = $query->fetchAll();
-	// to variables
-	$id = $user['id']; // id 
-	$dbpass = $user['password']; // db pass
-	// checking passwords
-	if($pass = $dbpass){
-		$_SESSION["id"] = $id;
-		echo '<p>Вход произведен успешно. <a href="/">Перейти на главную</a></p>';
-	}else{
-		echo'<p>Неправильный пароль. <a href="/">Попробовать еще раз</a></p>';
-	}
+	echo'<p>Ты уже вошёл. Зачем еще раз это делать? <a href="/">Перейти на главную</a></p>';
 }else{
-	echo'
-			<header>
-				<h2>Авторизация</h2>
-			</header>
-		<form method="post">
-		<div>
-		 <div class="row">
-			<div class="col-12">
-			<input type="text" class="form-control" name="name" id="name" placeholder="Введите имя">
+	if(!empty($_POST["name"]) && !empty($_POST["password"])){
+		$name = htmlspecialchars($_POST["name"],ENT_QUOTES);
+		$pass = md5(htmlspecialchars($_POST["password"],ENT_QUOTES));
+		// getting user
+		$query = $db->prepare("SELECT * FROM users WHERE name = :name"); 
+		$query->execute([':name' => $name]);
+		$user = $query->fetchAll();
+		// to variables
+		$id = $user['id']; // id 
+		$dbpass = $user['password']; // db pass
+		// checking passwords
+		if($pass = $dbpass){
+			$_SESSION["id"] = $id;
+			echo '<p>Вход произведен успешно. <a href="/">Перейти на главную</a></p>';
+		}else{
+			echo'<p>Неправильный пароль. <a href="/">Попробовать еще раз</a></p>';
+		}
+	}else{
+		echo'
+				<header>
+					<h2>Авторизация</h2>
+				</header>
+			<form method="post">
+			<div>
+			 <div class="row">
+				<div class="col-12">
+				<input type="text" class="form-control" name="name" id="name" placeholder="Введите имя">
+				</div>
+				<div class="col-12">
+				<input type="password" class="form-control" name="password" id="exampleInputPassword1" placeholder="Введите пароль">
+				</div>
+				<div class="col-12">
+					<input type="submit" value="Войти" />
+				</div>
+			  </div>	
 			</div>
-			<div class="col-12">
-			<input type="password" class="form-control" name="password" id="exampleInputPassword1" placeholder="Введите пароль">
-			</div>
-			<div class="col-12">
-				<input type="submit" value="Войти" />
-			</div>
-		  </div>	
-		</div>
-	</form>';
-}
+		</form>';
 	}
+}
 echo'</article>
 </div>
 				<!-- Footer -->
