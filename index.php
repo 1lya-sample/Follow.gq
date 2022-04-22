@@ -1,5 +1,15 @@
 <?php
 error_reporting(0);
+// **PREVENTING SESSION HIJACKING**
+// Prevents javascript XSS attacks aimed to steal the session ID
+ini_set('session.cookie_httponly', 1);
+
+// **PREVENTING SESSION FIXATION**
+// Session ID cannot be passed through URLs
+ini_set('session.use_only_cookies', 1);
+
+// Uses a secure connection (HTTPS) if possible
+ini_set('session.cookie_secure', 1);
 session_start();
 include "incl/connection.php";
 echo'<html>
@@ -13,7 +23,7 @@ echo'<html>
 		<!-- Wrapper-->
 			<div id="wrapper">';
 if(!empty($_GET['name'])){
-	$get = htmlspecialchars($_GET['name']);
+	$get = htmlspecialchars($_GET['name'],ENT_QUOTES);
 	$query = $db->prepare("SELECT count(*) FROM users WHERE name = :name"); 
 	$query->execute([':name' => $get]);
 	$count = $query->fetchColumn();
@@ -122,10 +132,10 @@ if(!empty($_GET['name'])){
 								<p>Follow.gq - сервис, c помощью которого вы легко и удобно сможете организовать ваши контактные данные в виде социальных сетей в собственном профиле.</p>
 									<div class="col-12">';	
 						if(!empty($_SESSION["id"]) AND $_SESSION["id"] != 0){
-						$id = htmlspecialchars($_SESSION["id"]);
-						$query = $db->prepare("SELECT name FROM users WHERE id = :id"); 
-						$query->execute([':id' => $id]);
-						$name = $query->fetchColumn();
+							$id = htmlspecialchars($_SESSION["id"]);
+							$query = $db->prepare("SELECT name FROM users WHERE id = :id"); 
+							$query->execute([':id' => $id]);
+							$name = $query->fetchColumn();
 							echo '<a href="auth/logout.php"><input type="submit" value="Выйти" /></a>
 								<a href="/'.$name.'"><input type="submit" value="Мой профиль" /></a>
 							';
