@@ -1,5 +1,5 @@
 # Follow.gq
-So, I'm leaking now this source code cause I will be working on project https://golink.info.
+So, I'm leaking now this source code cause I will be working on project https://go.yurba.one.
 
 It contains:
 - Account system (login, logout, register)
